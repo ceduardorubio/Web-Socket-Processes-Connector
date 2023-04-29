@@ -11,104 +11,21 @@
         Testing...
     </h1>
 
-    <script>
-        let ws = new WebSocket('ws://localhost:3000');
-        let count = 0;
-        let stackFn = [];
-        let stackListeners = [];
+    <script type="module">
+        import {CreateClientSocket} from './js/socket.browser.js';
+        const wsURL  = "ws://localhost:4000/";
+        const auth   = {user : 'admin', password:'admin'};
+        const client = CreateClientSocket(wsURL,auth,(err,res) => { 
+            console.log({cmd:'Connect',err,res});
 
-        console.log('connecting to localhost:3000');
-        // ws.onopen = function open() {
-        //     console.log('connected');
-        //     Send('auth',{user:'admin', password:'admin'},function(error, resp){
-        //         console.log({error, resp});
+            client.JoinGroup('company',(err,res) => { console.log({cmd: 'Join company',err,res});});
+            client.On("company's broadcast",(err,res) => { console.log({cmd:"company's broadcast",err,res});});
+            client.MakeRequest('getUsers',{},(err,res) => { console.log({cmd:'getUsers',err,res});});
+            client.On('to everyone',(err,res) => { console.log({cmd:'to everyone',err,res});});
 
-        //         Send('imIn',{group:'company'},function(err,res){
-        //             console.log({err,res});
-        //             Send('getUsers',{},function(err,res){
-        //                 console.log(JSON.stringify({err,res},null,4));
-        //                 Listen('tester',function(error, resp){
-        //                     console.log({error, resp});
-        //                     // Send('imOut',{group:'company'},function(err,res){
-        //                     //     console.log({err,res});
-                                
-        //                     // });
-
-        //                 });
-        //             });
-
-        //         });
-        //     });
-        
-        // }
-
-        ws.onmessage = function incoming(xMsg) {
-            let incomingData = xMsg.data;
-            try {
-                let  obj = JSON.parse(incomingData);
-                let { id, type, error,data } = obj;
-                if(type == "broadcast"){
-                    for(let i = 0; i < stackListeners.length; i++){
-                        let {id} = stackListeners[i];
-                        if(id == id){
-                            let fn = stackListeners[i].fn;
-                            fn(error,data);
-                        }
-                    }
-                } else {
-                    let foundIndex = -1;
-                    for (let i = 0; i < stackFn.length; i++) {
-                        if (id === stackFn[i].id) {
-                            foundIndex = i;
-                        }
-                    }
-                    if (foundIndex !== -1) {
-                        let fn = stackFn[foundIndex].fn;
-                        stackFn.splice(foundIndex, 1);
-                        fn(error, data);
-                    } else {
-                        console.log({error, data, no: 'not found'});
-                    }
-                }
-            } catch (e) {
-                // console.log(e);
-            }
-        };
-
-
-        ws.onerror = function error(err) {
-            console.log(err);
-        };
-
-        ws.onclose = function close() {
-            
-            console.log('disconnected');
-        };
-
-
-        function Send(iType,iData,cb){
-            let obj = {
-                type: iType,
-                data:iData,
-                id: count
-            }
-            stackFn.push({
-                id: count,
-                fn: cb
-            });
-            ws.send(JSON.stringify(obj));
-            count++;
-            
-        }
-
-
-        function Listen(iType,cb){
-            stackListeners.push({
-                id: iType,
-                fn: cb
-            });
-        }
-
+            setTimeout(() => client.LeaveGroup('company',(err,res) => { console.log({cmd:'Leave company',err,res});}), 10_000);
+            // setTimeout(() => client.Logout((err,res) => { console.log({cmd:'Logout',err,res});}), 16_000);
+        });
 
 
 
