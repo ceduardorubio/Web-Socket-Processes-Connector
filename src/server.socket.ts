@@ -3,7 +3,6 @@ import internal = require('stream');
 import { WebSocketServer,WebSocket,OPEN } from 'ws';
 import { AuthLoginFn, AuthLogoutFn, MiddlewareFn, SocketFn, SocketListeners, SocketPackage, SocketPackageData, SocketPackageInfo, SocketPackageResponse, SocketRouter, SocketServerCallsStack, SocketSession } from './interfaces';
 
-
 export const CreateServerSocket = (server:Server,authClientLogin:AuthLoginFn,authClientLogout:AuthLogoutFn = null,timeAlive:number = 30_000,onSocketError:(e:any) => void = console.error) => {
     const websocketServer:WebSocketServer = new WebSocketServer({ noServer: true });
     const routes:SocketRouter      = {};
@@ -99,6 +98,7 @@ export const CreateServerSocket = (server:Server,authClientLogin:AuthLoginFn,aut
     }, timeAlive);
 
     websocketServer.on('close', () => clearInterval(heartBeating));
+    
     const Broadcast = (name:string,group:string | null,data:SocketPackageData,emitter:WebSocket = null) => {
         let info: SocketPackageInfo = {  action: 'broadcast', request: name, group, packageID:null  };
         let r : SocketPackageResponse = { info, error: false, response: data };
@@ -109,8 +109,7 @@ export const CreateServerSocket = (server:Server,authClientLogin:AuthLoginFn,aut
                     if(ws['xSession']['groups'].includes(group))  ws.send( msg);
                 } else {
                     ws.send( msg);
-                }
-                
+                }                
             }
         });
     };

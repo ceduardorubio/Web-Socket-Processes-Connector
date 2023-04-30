@@ -17,7 +17,6 @@ export const CreateClientSocket = (url:string,authData:SocketPackageData,onLogin
         onError(e);
     });
 
-
     const AuthLoginServer = (cb:SocketFn) => {
         let info: SocketPackageInfo = {
             action   : 'auth',
@@ -34,7 +33,7 @@ export const CreateClientSocket = (url:string,authData:SocketPackageData,onLogin
         packageID++;
     }
 
-    webSocket.on('open', () => { 
+    webSocket.on('open', () => { // START HERE !!!
         AuthLoginServer((error,sessionData) => { 
             if(error){
                 session = null;
@@ -169,12 +168,5 @@ export const CreateClientSocket = (url:string,authData:SocketPackageData,onLogin
         packageID++;
     }
 
-    return {
-        MakeRequest,
-        JoinGroup,
-        LeaveGroup,
-        LeaveAllGroups,
-        On,
-        Logout
-    }
+    return { MakeRequest,JoinGroup,LeaveGroup,LeaveAllGroups,On,Logout }
 }

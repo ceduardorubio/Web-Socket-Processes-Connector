@@ -22,7 +22,6 @@ const users = {
 
 const server = http.createServer(app);
 const serverSocket = CreateServerSocket(server,(incomingData, setSession,closeSocketInternal,response )=> {
-    console.log({ incomingData });
     let { user, password } = incomingData;
     if (user === 'admin' && password === 'admin') {
         setSession({ user });
