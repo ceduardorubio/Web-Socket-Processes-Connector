@@ -12,7 +12,7 @@
     </h1>
 
     <script type="module">
-        import {CreateClientSocket} from './js/browser.socket.js';
+        import {CreateBrowserClientSocket} from './js/browser.socket.js';
         const wsURL  = "ws://localhost:4000/";
         const auth   = {user : 'admin', password:'admin'};
         const client = CreateBrowserClientSocket(wsURL,auth,(err,res) => { 

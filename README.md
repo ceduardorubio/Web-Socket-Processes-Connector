@@ -133,7 +133,7 @@ You can create you routes for your server process like this:
 
 
 
-You can see a working example in the folder [example](example) . Just execute server.example.ts in one terminal and client.example.ts in another terminal. Then open the browser in http://localhost:4000 and you will see the client example running in the browser.
+You can see a working example in the folder [example](example) on github. Just execute server.example.ts in one terminal and client.example.ts in another terminal. Then open the browser in http://localhost:4000 and you will see the client example running in the browser.
 
 
 
