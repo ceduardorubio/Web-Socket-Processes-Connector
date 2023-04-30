@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "connect multiple process and send, receive, broadcast data between them using web sockets",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ceduardorubio/Web-Socket-Processes-Connector.git"
+  },
   "files": [
     "dist"
   ],
