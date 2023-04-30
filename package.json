@@ -1,6 +1,6 @@
 {
   "name"       : "web-socket-processes-connector",
-  "version"    : "1.0.2",
+  "version"    : "1.0.4",
   "description": "connect multiple process and send, receive, broadcast data between them using web sockets",
   "main"       : "dist/index.js",
   "types"      : "dist/index.d.ts",
@@ -12,9 +12,10 @@
     "dist"
   ],
   "scripts": {
-    "tsc"         : "rm -rf ./dist; tsc",
-    "start-server": "node dis/examples/server.example.js",
-    "start-client": "node dist/example/client.example.js"
+    "tsc"            : "rm -rf ./dist; tsc",
+    "remove-examples": "rm -rf ./dist/examples",
+    "start-server"   : "node dis/examples/server.example.js",
+    "start-client"   : "node dist/example/client.example.js"
   },
   "keywords"    : [],
   "author"      : "carlos velásquez rubio",

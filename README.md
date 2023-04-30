@@ -8,12 +8,45 @@ This is a simple web socket connector that can be used to connect to a web socke
 ## Requirements
  - ws ( npm install ws inside package.json)
  - server requires http server (http , express)
+
+## Features
+- For client 
+
+
+    ```typescript
+        CreateClientSocket(url:string,authData:SocketPackageData,onLogin:SocketFn,onError:(data:any) => void = console.error) // connects to server and execute onLogin when server accepts connection with authData 
+        // execute the next procedures after onLogin. Example:
+        const client = CreateClientSocket(url,authData,(err,res) => { 
+            client.MakeRequest('getUsers',{},(err,res) => { console.log({cmd:'getUsers',err,res});});
+        });
+
+
+        // client after login methods
+        client.MakeRequest (request:string | number,data:SocketPackageData,cb:SocketFn);//  make request to server, send data and execute callback when server responds
+        client.JoinGroup(group:string,cb:SocketFn);                                     // join group with name
+        client.LeaveGroup(group:string,cb:SocketFn);                                    //  leave group with name
+        client.LeaveAllGroups(cb:SocketFn);                                             // leave all groups
+        client.On(name:string,cb:SocketFn);                                             // execute callback when server sends a message with name
+        client.Logout(cb:SocketFn);                                                     // logout from server
+
+    ```
+
+- For server
+
+
+    ```typescript
+        const socketServer = CreateServerSocket(server:Server,authClientLogin:AuthLoginFn,authClientLogout:AuthLogoutFn = null,timeAlive:number = 30_000,onSocketError:(e:any) => void = console.error) // create server socket and execute authClientLogin when client connects and authClientLogout when client asks to logout. timeAlive is the time in milliseconds that the server will wait for a client to send a message before closing the connection and ping pong messages are sent to keep the connection alive.
+        socketServer.On(type:string,cb:MiddlewareFn), // execute callback when client sends a message with type
+        socketServer.Close()                        // close server
+        socketServer.Broadcast(name:string,group:string | null,data:SocketPackageData,emitter:WebSocket = null) // broadcast message to all clients or to a group of clients inside a group
+    ```
+
 ## Usage
 
 ### Installation
 ```npm install web-socket-processes-connector```
 
-### Importing Server
+### Importing socketServer
 ```typescript
 
     import http from 'http';
