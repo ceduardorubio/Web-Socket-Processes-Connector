@@ -1,29 +1,30 @@
 {
-  "name": "web-socket-processes-connector",
-  "version": "1.0.0",
+  "name"       : "web-socket-processes-connector",
+  "version"    : "1.0.2",
   "description": "connect multiple process and send, receive, broadcast data between them using web sockets",
-  "main": "index.js",
-  "repository": {
+  "main"       : "dist/index.js",
+  "types"      : "dist/index.d.ts",
+  "repository" : {
     "type": "git",
-    "url": "https://github.com/ceduardorubio/Web-Socket-Processes-Connector.git"
+    "url" : "https://github.com/ceduardorubio/Web-Socket-Processes-Connector.git"
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "tsc":  "rm -rf ./dist; tsc",
+    "tsc"         : "rm -rf ./dist; tsc",
     "start-server": "node dis/examples/server.example.js",
     "start-client": "node dist/example/client.example.js"
   },
-  "keywords": [],
-  "author": "carlos velásquez rubio",
-  "license": "MIT",
+  "keywords"    : [],
+  "author"      : "carlos velásquez rubio",
+  "license"     : "MIT",
   "dependencies": {
     "ws": "^8.13.0"
   },
   "devDependencies": {
-    "express": "^4.18.2",
+    "express"    : "^4.18.2",
     "@types/node": "^18.16.2",
-    "@types/ws": "^8.5.4"
+    "@types/ws"  : "^8.5.4"
   }
 }
