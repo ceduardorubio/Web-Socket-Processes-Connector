@@ -1,21 +1,21 @@
-import { SocketFn, SocketListeners, SocketPackage, SocketPackageData, SocketPackageInfo, SocketPackageResponse, SocketServerCallsStack } from "./interfaces";
+import { WebSocket } from 'ws';
+import { SocketFn, SocketListeners, SocketPackage, SocketPackageData, SocketPackageInfo, SocketPackageResponse, SocketServerCallsStack } from './interfaces';
 
-export const CreateBrowserClientSocket = (url:string,authData:SocketPackageData,onLogin:SocketFn,onError:(data:any) => void = console.error) => {
+export const CreateClientSocket = (url:string,authData:SocketPackageData,onLogin:SocketFn,onError:(data:any) => void = console.error) => {
     let   webSocket:WebSocket               = new WebSocket(url);;
     let   packageID:number                  = 0;
     let   session  :SocketPackageData       = null;
     const calls    :SocketServerCallsStack  = {};
     const listeners:SocketListeners         = {};
 
-    webSocket.onerror =  e => {
+    webSocket.on('error', e => {
         session = null;
         onError(e);
-    };
-
-    webSocket.onclose = e => {
+    });
+    webSocket.on('close', e => {
         session = null;
         onError(e);
-    };
+    });
 
 
     const AuthLoginServer = (cb:SocketFn) => {
@@ -34,7 +34,7 @@ export const CreateBrowserClientSocket = (url:string,authData:SocketPackageData,
         packageID++;
     }
 
-    webSocket.onopen =  () => { 
+    webSocket.on('open', () => { 
         AuthLoginServer((error,sessionData) => { 
             if(error){
                 session = null;
@@ -45,10 +45,9 @@ export const CreateBrowserClientSocket = (url:string,authData:SocketPackageData,
                 onLogin(null,sessionData);
             }
         });
-    }
+    });
 
-    webSocket.onmessage = function incoming(xMsg) {
-        let incomingData:string = xMsg.data;
+    webSocket.on('message', function incoming(incomingData:string) {
         try {
             let r:SocketPackageResponse = JSON.parse(incomingData);
             let { info,error,response } = r;
@@ -67,7 +66,7 @@ export const CreateBrowserClientSocket = (url:string,authData:SocketPackageData,
         } catch (e) {
             onError( 'invalid data: ' + incomingData);
         }
-    };
+    });
 
     const MakeRequest = (request:string | number,data:SocketPackageData,cb:SocketFn) => {
         if(session){

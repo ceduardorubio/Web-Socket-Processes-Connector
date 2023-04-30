@@ -1,4 +1,4 @@
-export const CreateClientSocket = (url,authData,onLogin,onError = console.error) => {
+export const CreateBrowserClientSocket = (url,authData,onLogin,onError = console.error) => {
     let   webSocket = new WebSocket(url);;
     let   packageID = 0;
     let   session   = null;

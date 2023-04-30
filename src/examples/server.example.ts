@@ -1,7 +1,7 @@
 
 import http from 'http';
 import express from 'express';
-import { CreateServerSocket } from './socket';
+import { CreateServerSocket } from '../server.socket';
 const app     = express();
 
 app.use(express.static('public'));
