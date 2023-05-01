@@ -6,6 +6,7 @@ import { AuthLoginFn, AuthLogoutFn, MiddlewareFn, SocketFn, SocketListeners, Soc
 export const CreateServerSocket = (server:Server,authClientLogin:AuthLoginFn,authClientLogout:AuthLogoutFn = null,timeAlive:number = 30_000,onSocketError:(e:any) => void = console.error) => {
     const websocketServer:WebSocketServer = new WebSocketServer({ noServer: true });
     const routes:SocketRouter      = {};
+    let broadcastPackageID:number  = 0;
 
     server.on('upgrade',  (request:IncomingMessage, socketInternal:internal.Duplex, head:Buffer) => {
         socketInternal.on('error',onSocketError);
@@ -100,7 +101,8 @@ export const CreateServerSocket = (server:Server,authClientLogin:AuthLoginFn,aut
     websocketServer.on('close', () => clearInterval(heartBeating));
     
     const Broadcast = (name:string,group:string | null,data:SocketPackageData,emitter:WebSocket = null) => {
-        let info: SocketPackageInfo = {  action: 'broadcast', request: name, group, packageID:null  };
+        broadcastPackageID++;
+        let info: SocketPackageInfo = {  action: 'broadcast', request: name, group, packageID:broadcastPackageID  };
         let r : SocketPackageResponse = { info, error: false, response: data };
         let msg = JSON.stringify(r);
         websocketServer.clients.forEach((ws:WebSocket) => {

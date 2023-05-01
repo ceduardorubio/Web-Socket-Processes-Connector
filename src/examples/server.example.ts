@@ -22,6 +22,8 @@ const users = {
 
 const server = http.createServer(app);
 const serverSocket = CreateServerSocket(server,(incomingData, setSession,closeSocketInternal,response )=> {
+    console.log("authenticating");
+    console.log({incomingData});
     let { user, password } = incomingData;
     if (user === 'admin' && password === 'admin') {
         setSession({ user });
@@ -40,10 +42,10 @@ setInterval(() => {
     serverSocket.Broadcast("company's broadcast", "company" ,{
         message: 'this is a message that only company group will receive',
     });
-}, 3000);
+}, 1000);
 
 setInterval(() => {
     serverSocket.Broadcast('to everyone',null,{
         message: 'this is a message that all groups will receive',
     });
-}, 4000);
+}, 1700);

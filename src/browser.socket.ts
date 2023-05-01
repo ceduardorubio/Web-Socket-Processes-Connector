@@ -1,21 +1,33 @@
 import { SocketFn, SocketListeners, SocketPackage, SocketPackageData, SocketPackageInfo, SocketPackageResponse, SocketServerCallsStack } from "./interfaces";
 
 export const CreateBrowserClientSocket = (url:string,authData:SocketPackageData,onLogin:SocketFn,onError:(data:any) => void = console.error) => {
-    let   webSocket:WebSocket               = new WebSocket(url);;
-    let   packageID:number                  = 0;
-    let   session  :SocketPackageData       = null;
-    const calls    :SocketServerCallsStack  = {};
-    const listeners:SocketListeners         = {};
+    let webSocket = new WebSocket(url);;
+    let packageID = 0;
+    let session   = null;
+    let calls     = {};
+    let listeners = {};
 
-    webSocket.onerror =  e => {
-        session = null;
-        onError(e);
-    };
-
-    webSocket.onclose = e => {
-        session = null;
-        onError(e);
-    };
+    const ReConnect = () => {
+        setTimeout(() => {
+            console.log('reconnecting...');
+            try {
+                webSocket.onclose = () => {};
+                webSocket.onerror = () => {};
+                webSocket.onopen  = () => {};
+                webSocket.onmessage = () => {};
+                webSocket.close();
+                webSocket = new WebSocket(url);
+                packageID  = 0;
+                session    = null; 
+                calls      = {};
+                listeners  = {};
+                AppendListeners();
+            } catch(e){
+                console.log('error reconnecting...');
+                console.log(e);
+            }
+        },2_000);
+    }
 
 
     const AuthLoginServer = (cb:SocketFn) => {
@@ -34,41 +46,54 @@ export const CreateBrowserClientSocket = (url:string,authData:SocketPackageData,
         packageID++;
     }
 
-    webSocket.onopen =  () => { 
-        AuthLoginServer((error,sessionData) => { 
-            if(error){
-                session = null;
-                onLogin(error,null);
+    const AppendListeners = () =>{
+        webSocket.onerror =  e => {
+            onError(e);
+            setTimeout(() => { ReConnect(); }, 2_000);
+            webSocket.close();
+        };
+        webSocket.onclose = e => {
+            console.log('error...');
+            onError(e);
+            setTimeout(() => { ReConnect(); }, 2_000);
+            webSocket.close();
+        };
+        webSocket.onopen =  () => { 
+            console.log("open");
+            AuthLoginServer((error,sessionData) => { 
+                if(error){
+                    session = null;
+                    onLogin(error,null);
 
-            } else {
-                session = sessionData;
-                onLogin(null,sessionData);
-            }
-        });
-    }
-
-    webSocket.onmessage = function incoming(xMsg) {
-        let incomingData:string = xMsg.data;
-        try {
-            let r:SocketPackageResponse = JSON.parse(incomingData);
-            let { info,error,response } = r;
-            if(info.action == "broadcast"){
-                let { request } = info;
-                if(listeners[request]) listeners[request].forEach(fn => fn(error,response));
-            } else {
-                if(info.action == "call" || info.action == "group" || info.action == "auth"){
-                    let { packageID } = info;
-                    if(calls[packageID]){
-                        calls[packageID](error,response);
-                        delete calls[packageID];
+                } else {
+                    session = sessionData;
+                    onLogin(null,sessionData);
+                }
+            });
+        };
+        webSocket.onmessage = function incoming(xMsg) {
+            let incomingData:string = xMsg.data;
+            try {
+                let r:SocketPackageResponse = JSON.parse(incomingData);
+                let { info,error,response } = r;
+                if(info.action == "broadcast"){
+                    let { request } = info;
+                    if(listeners[request]) listeners[request].forEach(fn => fn(error,response));
+                } else {
+                    if(info.action == "call" || info.action == "group" || info.action == "auth"){
+                        let { packageID } = info;
+                        if(calls[packageID]){
+                            calls[packageID](error,response);
+                            delete calls[packageID];
+                        }
                     }
                 }
+            } catch (e) {
+                onError( 'invalid data: ' + incomingData);
             }
-        } catch (e) {
-            onError( 'invalid data: ' + incomingData);
-        }
-    };
-
+        };
+    }
+    AppendListeners();
     const MakeRequest = (request:string | number,data:SocketPackageData,cb:SocketFn) => {
         if(session){
             let info: SocketPackageInfo = {

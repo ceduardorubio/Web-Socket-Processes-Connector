@@ -4,6 +4,7 @@ This is a simple web socket connector that can be used to connect to a web socke
  - No redis required
  - No database required
  - No Socket.io required
+ - Auto reconnection 
 
 ## Requirements
  - ws ( npm install ws inside package.json)

@@ -23,7 +23,7 @@
             client.MakeRequest('getUsers',{},(err,res) => { console.log({cmd:'getUsers',err,res});});
             client.On('to everyone',(err,res) => { console.log({cmd:'to everyone',err,res});});
 
-            setTimeout(() => client.LeaveGroup('company',(err,res) => { console.log({cmd:'Leave company',err,res});}), 10_000);
+            setTimeout(() => client.LeaveGroup('company',(err,res) => { console.log({cmd:'Leave company',err,res});}), 3_000);
             // setTimeout(() => client.Logout((err,res) => { console.log({cmd:'Logout',err,res});}), 16_000);
         });
 
