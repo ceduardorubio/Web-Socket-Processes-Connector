@@ -1,3 +1,4 @@
+import { WebSocket } from "ws"
 
 export interface SocketSession {
     isAlive: boolean,
@@ -44,4 +45,11 @@ export type MiddlewareFn = (data:SocketPackageData,response:SocketFn,sessionData
 
 export interface SocketRouter {
     [key:string | number]:MiddlewareFn
+}
+
+export interface SocketServer {
+    On:(type:string,cb:MiddlewareFn) => void,
+    Close: () => void,
+    Broadcast: (name:string,group:string | null,data:SocketPackageData,emitter?:WebSocket) => void
+
 }

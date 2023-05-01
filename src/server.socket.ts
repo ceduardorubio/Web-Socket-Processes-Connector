@@ -1,7 +1,7 @@
 import { IncomingMessage, Server } from 'http';
 import internal = require('stream');
 import { WebSocketServer,WebSocket,OPEN } from 'ws';
-import { AuthLoginFn, AuthLogoutFn, MiddlewareFn, SocketFn, SocketListeners, SocketPackage, SocketPackageData, SocketPackageInfo, SocketPackageResponse, SocketRouter, SocketServerCallsStack, SocketSession } from './interfaces';
+import { AuthLoginFn, AuthLogoutFn, MiddlewareFn, SocketFn, SocketListeners, SocketPackage, SocketPackageData, SocketPackageInfo, SocketPackageResponse, SocketRouter, SocketServer, SocketServerCallsStack, SocketSession } from './interfaces';
 
 export const CreateServerSocket = (server:Server,authClientLogin:AuthLoginFn,authClientLogout:AuthLogoutFn = null,timeAlive:number = 30_000,onSocketError:(e:any) => void = console.error) => {
     const websocketServer:WebSocketServer = new WebSocketServer({ noServer: true });
@@ -116,7 +116,7 @@ export const CreateServerSocket = (server:Server,authClientLogin:AuthLoginFn,aut
         });
     };
 
-    const webSocketServer = {
+    const webSocketServer:SocketServer = {
         On:(type:string,cb:MiddlewareFn) => routes[type] = cb,
         Close: () => websocketServer.close(),
         Broadcast
