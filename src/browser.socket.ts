@@ -1,6 +1,6 @@
 import { SocketFn, SocketListeners, SocketPackage, SocketPackageData, SocketPackageInfo, SocketPackageResponse, SocketServerCallsStack } from "./interfaces";
 
-export const CreateBrowserClientSocket = (url:string,authData:SocketPackageData,onLogin:SocketFn,onError:(data:any) => void = console.error) => {
+export const CreateBrowserClientSocket = (url:string,authData:SocketPackageData,onLogin:SocketFn,onError:(data:any) => void = console.log) => {
     let webSocket = new WebSocket(url);;
     let packageID = 0;
     let session   = null;
