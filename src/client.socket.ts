@@ -9,25 +9,26 @@ export const CreateClientSocket = (url:string,authData:SocketPackageData,onLogin
     let session  :SocketPackageData      = null;
     let calls    :SocketServerCallsStack = {};
     let listeners:SocketListeners        = {};
+    let authFail :boolean                = false;
+    let mainAuthData:SocketPackageData   = authData;
 
     const ReConnect = () => {
+        if(authFail) return;
         setTimeout(() => {
-            console.log('reconnecting...');
             try {
                 ws = new WebSocket(url);
                 packageID  = 0;
                 session    = null; 
                 calls      = {};
                 listeners  = {};
-                AppendListeners();
+                AppendListeners(mainAuthData);
             } catch(e){
-                console.log('error reconnecting...');
-                console.log(e);
+                onError(e);
             }
         },2_000);
     }
 
-    const AppendListeners = () =>{
+    const AppendListeners = (authenticationData:SocketPackageData) =>{
         ws.on('error', e => {
             console.log('error...');
             onError(e);
@@ -44,8 +45,9 @@ export const CreateClientSocket = (url:string,authData:SocketPackageData,onLogin
         });
         
         ws.on('open', () => { // START HERE !!!
-            AuthLoginServer((error,sessionData) => { 
+            AuthLoginServer(authenticationData,(error,sessionData) => { 
                 if(error){
+                    authFail = true;
                     session = null;
                     onLogin(error,null);                    
                 } else {
@@ -76,9 +78,9 @@ export const CreateClientSocket = (url:string,authData:SocketPackageData,onLogin
         });
     }
 
-    AppendListeners();
+    AppendListeners(mainAuthData);
 
-    const AuthLoginServer = (cb:SocketFn) => {
+    const AuthLoginServer = (authenticationData,cb:SocketFn) => {
         let info: SocketPackageInfo = {
             action   : 'auth',
             request  : 'login',
@@ -86,7 +88,7 @@ export const CreateClientSocket = (url:string,authData:SocketPackageData,onLogin
             packageID: packageID
         }
         let obj:SocketPackage = {
-            data:authData,
+            data:authenticationData,
             info:info
         }
         calls[packageID] = cb;
@@ -195,5 +197,11 @@ export const CreateClientSocket = (url:string,authData:SocketPackageData,onLogin
         packageID++;
     }
 
-    return { MakeRequest,JoinGroup,LeaveGroup,LeaveAllGroups,On,Logout }
+    const ReTryConnect = (newAuthData:SocketPackageData ) => {
+        mainAuthData = newAuthData;
+        authFail = false;
+        AppendListeners(newAuthData);
+    }
+
+    return { MakeRequest,JoinGroup,LeaveGroup,LeaveAllGroups,On,Logout,ReTryConnect }
 }
