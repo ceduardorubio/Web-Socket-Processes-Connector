@@ -1,23 +1,34 @@
 import { IncomingMessage, Server } from 'http';
 import internal = require('stream');
 import { WebSocketServer,WebSocket,OPEN } from 'ws';
-import { AuthLoginFn, AuthLogoutFn, MiddlewareFn, SocketFn, SocketPackage, SocketPackageData, SocketPackageInfo, SocketPackageResponse, SocketRouter, SocketServer, SocketSession } from './interfaces';
+import { AuthLoginFn, AuthLogoutFn, MiddlewareFn, SocketFn, SocketHttpRequestHandler, SocketPackage, SocketPackageData, SocketPackageInfo, SocketPackageResponse, SocketRouter, SocketServer, SocketSession } from './interfaces';
 
 export const CreateServerSocket = (server:Server,onClientAuthenticationRequest:AuthLoginFn,onClientLogout:AuthLogoutFn = null,timeAlive:number = 3_000,onSocketError:(e:any) => void = console.error) => {
-    const websocketServer:WebSocketServer = new WebSocketServer({ noServer: true });
-    const routes:SocketRouter             = {};
-    let   broadcastPackageID:number       = 0;
-    let   startSessionTimeout:number      = timeAlive * 0.75; // less than heartbeatInterval
-    let   heartbeatInterval:number        = timeAlive;
-    let   authLogout:AuthLogoutFn         = onClientLogout;
+    const websocketServer    :WebSocketServer          = new WebSocketServer({ noServer: true });
+    const routes             :SocketRouter             = {};                                        // routes are for calls. Empty
+    let   broadcastPackageID :number                   = 0;
+    let   startSessionTimeout:number                   = timeAlive * 0.75;                         // less than heartbeatInterval
+    let   heartbeatInterval  :number                   = timeAlive;
+    let   authLogout         :AuthLogoutFn             = onClientLogout;
+    let   requestHandler    :SocketHttpRequestHandler = null;
 
     server.on('upgrade',  (request:IncomingMessage, socketInternal:internal.Duplex, head:Buffer) => {
         socketInternal.on('error',onSocketError);
         socketInternal.removeListener('error', onSocketError);
-        websocketServer.handleUpgrade(request, socketInternal, head,(websocket:WebSocket) => websocketServer.emit('connection',websocket,socketInternal));
+        const notGranted = () => socketInternal.destroy(); 
+        const granted    = () => {
+            websocketServer.handleUpgrade(request, socketInternal, head,(websocket:WebSocket) => {
+                websocketServer.emit('connection',request,websocket,socketInternal)
+            });
+        }
+        if ( requestHandler ) {
+            requestHandler(request ,granted,notGranted);
+        } else {
+            granted();
+        }  
     });
 
-    websocketServer.on('connection',(websocket:WebSocket, socketInternal:internal.Duplex) => {
+    websocketServer.on('connection',(httpRequest:IncomingMessage,websocket:WebSocket, socketInternal:internal.Duplex) => {
         const session:SocketSession = {
             isAlive: true,  // heartbeat
             data   : null,  // session data 
@@ -96,7 +107,7 @@ export const CreateServerSocket = (server:Server,onClientAuthenticationRequest:A
             } else { // if the client is not authenticated
                 if((action === 'auth') && (request === 'login')){ // if the client is trying to authenticate
                     const setSession = sessionData => session.data = sessionData;
-                    onClientAuthenticationRequest(data,setSession,closeSocketInternal,SendToClient); // call the authentication function
+                    onClientAuthenticationRequest(data,setSession,closeSocketInternal,SendToClient,httpRequest); // call the authentication function
                 } else {
                     // if the client is not authenticated and is not trying to authenticate, close the socket
                     closeSocketInternal();                        
@@ -156,6 +167,10 @@ export const CreateServerSocket = (server:Server,onClientAuthenticationRequest:A
         websocketServer.close();
     }
 
+    const SetRequestHandler = (httpRequestHandler:SocketHttpRequestHandler) => {
+        requestHandler = httpRequestHandler;
+    }
+
     /**
      * Alias for On
      */
@@ -178,6 +193,7 @@ export const CreateServerSocket = (server:Server,onClientAuthenticationRequest:A
         SetTimeoutForAuthenticationRequest,
         SetHeartbeatInterval,
         SetOnLogout,
+        SetRequestHandler
 
     };
 
