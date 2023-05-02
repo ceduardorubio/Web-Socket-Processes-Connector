@@ -48,8 +48,14 @@ export interface SocketRouter {
 }
 
 export interface SocketServer {
-    On:(type:string,cb:MiddlewareFn) => void,
-    Close: () => void,
-    Broadcast: (name:string,group:string | null,data:SocketPackageData,emitter?:WebSocket) => void
+    On                                : (requestOrRouteName:string,cb:MiddlewareFn) => void
+    OnRequest                         : (requestOrRouteName:string,cb:MiddlewareFn) => void
+    SetRoute                          : (requestOrRouteName:string,cb:MiddlewareFn) => void
+    SetCall                           : (requestOrRouteName:string,cb:MiddlewareFn) => void
+    Close                             : () => void
+    Broadcast                         : (name:string,group:string | null,data:SocketPackageData,emitter?:WebSocket) => void
+    SetTimeoutForAuthenticationRequest: (time:number) => void
+    SetHeartbeatInterval              : (time:number) => void
+    SetOnLogout                       : (logout:AuthLogoutFn) => void
 
 }
