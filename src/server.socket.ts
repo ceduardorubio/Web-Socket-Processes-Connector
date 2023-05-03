@@ -7,10 +7,10 @@ export const CreateServerSocket = (server:Server,onClientAuthenticationRequest:A
     const websocketServer    :WebSocketServer          = new WebSocketServer({ noServer: true });
     const routes             :SocketRouter             = {};                                        // routes are for calls. Empty
     let   broadcastPackageID :number                   = 0;
-    let   startSessionTimeout:number                   = timeAlive * 0.75;                         // less than heartbeatInterval
+    let   startSessionTimeout:number                   = timeAlive * 0.75;                          // less than heartbeatInterval
     let   heartbeatInterval  :number                   = timeAlive;
     let   authLogout         :AuthLogoutFn             = onClientLogout;
-    let   requestHandler    :SocketHttpRequestHandler = null;
+    let   requestHandler     :SocketHttpRequestHandler = null;                                     // request handler is for http requests before the upgrade to websocket
 
     server.on('upgrade',  (request:IncomingMessage, socketInternal:internal.Duplex, head:Buffer) => {
         socketInternal.on('error',onSocketError);

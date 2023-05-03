@@ -40,7 +40,8 @@ serverSocket.On('getUsers', (incomingData, resp,sessionData,groups) => resp(null
 
 const wsURL  = "ws://localhost:3000/";
 const auth   = {user : 'admin', password:'admin'};
-const client = CreateClientSocket(wsURL,auth,(err,res) => { 
+const client = CreateClientSocket();
+client.StartConnection(auth,wsURL,(err,res) => { 
     console.log({cmd:'Connect',err,res});
     //client.MakeRequest('getUsers',{},(err,res) => { console.log({cmd:'getUsers',err,res});});
 
@@ -54,7 +55,7 @@ const client = CreateClientSocket(wsURL,auth,(err,res) => {
 
     // setTimeout(() => client.LeaveGroup('company',(err,res) => { console.log({cmd:'Leave company',err,res});}), 10_000);
     // setTimeout(() => client.Logout((err,res) => { console.log({cmd:'Logout',err,res});}), 16_000);
-});
+})
 
 
 
