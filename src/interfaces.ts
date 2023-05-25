@@ -40,7 +40,7 @@ export interface SocketListeners {
 export type SocketFn                 = (error: any, response: SocketPackageData) => void
 export type AuthLoginFn              = (data:any,setSession:(data:SocketPackageData)=> void ,closeSocketInternal:() => void,SendToClient:SocketFn,httpRequest:IncomingMessage) => void
 export type AuthLogoutFn             = (sessionData:SocketPackageData,SendToClient:SocketFn) => void
-export type MiddlewareFn             = (data:SocketPackageData,response:SocketFn,sessionData:SocketPackageData,groups:string[]) => void
+export type MiddlewareFn             = (data:SocketPackageData,response:SocketFn,sessionData:SocketPackageData,groups:string[],emitter:WebSocket) => void
 export type SocketHttpRequestHandler = (httpRequest:IncomingMessage,cbGranted:() => void, cbNotGranted:() => void) => void
 
 export interface SocketRouter {

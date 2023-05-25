@@ -82,7 +82,7 @@ export const CreateServerSocket = (server:Server,onClientAuthenticationRequest:A
                         } else {
                             if(Object.keys(request).length > 0){     // if there are routes defined
                                 if(routes[request]){                   // if the route exists
-                                    routes[request](data,SendToClient,session.data,session.groups); // call the route
+                                    routes[request](data,SendToClient,session.data,session.groups,websocket); // call the route
                                 } else {
                                     SendToClient('invalid call request',{ done : false });
                                 }
